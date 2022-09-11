@@ -1,5 +1,6 @@
 const HDWalletProvider = require("@truffle/hdwallet-provider");
 const Web3 = require("web3");
+const fs = require("fs");
 const { abi, bytecode } = require("./compile");
 require("dotenv").config();
 
@@ -25,7 +26,24 @@ const deploy = async () => {
       from: devAccount,
     });
 
-  console.log("Contract deployed to", result.options.address);
+  const data = {
+    contract_address: result.options.address,
+    abi: abi,
+  };
+
+  if (!fs.existsSync("./build")) {
+    fs.mkdirSync("./build");
+  }
+
+  fs.writeFile("./build/contract.json", JSON.stringify(data), (err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log("Contract deployed to", data.contract_address);
+      console.log(fs.readFileSync("./build/contract.json", "utf8"));
+    }
+  });
+
   provider.engine.stop();
 };
 
