@@ -3,6 +3,15 @@ pragma solidity >=0.7.0 <0.9.0;
 contract Lottery {
     address public manager;
     address[] public players;
+    address tempWinner;
+
+    struct Winner {
+        uint256 _timestamp;
+        address player;
+    }
+
+    mapping(uint256 => Winner) winners;
+    uint256[] winnerList;
 
     constructor() {
         manager = msg.sender;
@@ -28,9 +37,33 @@ contract Lottery {
     }
 
     function pickWinner() public restricted {
-        uint256 index = random() % players.length;
-        payable(players[index]).transfer(address(this).balance);
+        tempWinner = players[random() % players.length];
+
+        payable(tempWinner).transfer(address(this).balance * 80 / 100);
+        payable(manager).transfer(address(this).balance);
+
         players = new address[](0);
+    }
+
+    function setWinnerList() public restricted {
+        require (tempWinner != address(0), "Pick a winner first before set the winner list.");
+        require (players.length == 0, "Pick a winner first before set the winner list.");
+
+        uint256 listLength = winnerList.length;
+        Winner storage newWinner = winners[listLength];
+        newWinner._timestamp = block.timestamp;
+        newWinner.player = tempWinner;
+        winnerList.push(listLength);
+        tempWinner = address(0);
+    }
+
+    function getWinnerListLength() public view returns (uint256) {
+        return winnerList.length;
+    }
+
+    function getWinnerInfo(uint256 index) public view returns (uint256, address) {
+        Winner storage w = winners[index];
+        return (w._timestamp, w.player);
     }
 
     modifier restricted() {
