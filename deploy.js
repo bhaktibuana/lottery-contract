@@ -22,7 +22,7 @@ const deploy = async () => {
       data: bytecode,
     })
     .send({
-      gas: "1000000",
+      gas: "10000000",
       from: devAccount,
     });
 
