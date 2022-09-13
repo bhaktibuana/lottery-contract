@@ -1,7 +1,7 @@
 const assert = require("assert");
 const ganache = require("ganache-cli");
 const Web3 = require("web3");
-const web3 = new Web3(ganache.provider());
+const web3 = new Web3("http://127.0.0.1:7545");
 const { abi, bytecode } = require("../compile");
 
 let lottery, accounts;
@@ -21,7 +21,7 @@ beforeEach(async () => {
     })
     .send({
       from: address.manager,
-      gas: "1000000",
+      gas: "10000000",
     });
 });
 
@@ -93,7 +93,7 @@ describe("Lottery Contract", () => {
   it("sends money to the winner and resets the players array", async () => {
     await lottery.methods.enter().send({
       from: address.player1,
-      value: web3.utils.toWei("0.02", "ether"),
+      value: web3.utils.toWei("0.01", "ether"),
     });
 
     const initialBalance = await web3.eth.getBalance(address.player1);
